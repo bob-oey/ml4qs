@@ -18,7 +18,6 @@ if "app_usage" not in os.listdir(rootdir):
         sys.exit()
 
 def getFolderDict(plot=False): 
-
     users = ["u0" + str(userid) if userid < 10 else "u"+ str(userid) for userid in list(range(0,60))]
     datatypes = {}
 
@@ -34,8 +33,6 @@ def getFolderDict(plot=False):
                 if fnmatch.fnmatch(file, "*"+"json") and "EMA" not in subdir:
                     # print(name)
                     pass
-    # print(datatypes)
-
     
     if plot == True:
         labels = []
@@ -117,7 +114,7 @@ def loadJSONs():
                             userdf['userid'] = user
                             dirdf = dirdf.append(userdf)
                         else:
-                            print("OY! Empty DF for:", name, user)
+                            print("Empty DF for:", name, user)
 
         dataframes[name] = dirdf
         
