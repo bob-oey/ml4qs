@@ -57,21 +57,22 @@ def getFolderDict(plot=False):
 
 # folderdict = getFolderDict()
 
-def loadCSVs():
+def loadCSVs(foldersplit=False):
     users = ["u0" + str(userid) if userid < 10 else "u"+ str(userid) for userid in list(range(0,60))]
 
     datatypes = {}
     dataframes = {}
-
+    print("CSV parsing")
     # new df with column userid
     df = pd.DataFrame(columns=['userid'])
     for subdir, dirs, files in os.walk(rootdir):
         name = os.path.basename(subdir)
+        print("Parsing", name, "CSVs")
         datatypes[name] = []
         dirdf = pd.DataFrame()        
         for file in files:
             for user in users:
-                if fnmatch.fnmatch(file, "*"+user+"*"+"csv") and "calendar" not in subdir and "dinning" not in subdir and "EMA" not in subdir:
+                if fnmatch.fnmatch(file, "*"+user+"*"+"csv") and "calendar" not in subdir and "dinning" not in subdir and "EMA" not in subdir and "audio" not in subdir:
                     # print(file)
                     datatypes[name].append(user)
 
@@ -79,7 +80,12 @@ def loadCSVs():
                     userdf['userid'] = user
                     dirdf = dirdf.append(userdf)
                     # print(userdf)
-        dataframes[name] = dirdf
+        if foldersplit == True:
+            filename = "csv"+name+".pickle"
+            pickle.dump(dirdf, open(filename, "wb"))
+            print("Saved", filename)
+        else:
+            dataframes[name] = dirdf
 
     for df in dataframes:
         if dataframes[df].empty:
@@ -87,15 +93,16 @@ def loadCSVs():
 
     return dataframes
 
-def loadJSONs():
+def loadJSONs(foldersplit=False):
     users = ["u0" + str(userid) if userid < 10 else "u"+ str(userid) for userid in list(range(0,60))]
 
     datatypes = {}
     dataframes = {}
-
+    print("JSON parsing")
     for subdir, dirs, files in os.walk(rootdir):
         name = os.path.basename(subdir)
         # print(name)
+        print("Parsing", name, "JSONs")
         datatypes[name] = []
         dirdf = pd.DataFrame()        
         for file in files:
@@ -115,32 +122,41 @@ def loadJSONs():
                             dirdf = dirdf.append(userdf)
                         else:
                             print("Empty DF for:", name, user)
-
-        dataframes[name] = dirdf
+        # save dataframe pickle to folder
+        if foldersplit == True:
+            filename = "json"+name+".pickle"
+            pickle.dump(dirdf, open(filename, "wb"))
+            print("Saved", filename)
+        else:
+            dataframes[name] = dirdf
         
     delete = [key for key in dataframes if dataframes[key].empty]
     for key in delete: del dataframes[key]
 
     return dataframes
 
-def makeDFs(option="both"):
+def makeDFs(option="both",foldersplit=False):
+
+    print("Making", option, "dataframes")
     csvdataframe = {}
     jsondataframe = {}
 
     if option is not "json":
-        csvdataframe = loadCSVs()
+        csvdataframe = loadCSVs(foldersplit)
 
         # print(csvdataframe['activity'])
-        pickle.dump(csvdataframe, open("csvdict.pickle", "wb"))
-        if option is "csv":
-            return csvdataframe
+        if foldersplit == False:
+            pickle.dump(csvdataframe, open("csvdict.pickle", "wb"))
+            if option is "csv":
+                return csvdataframe
 
     if option is not "csv":
-        jsondataframe = loadJSONs()
+        jsondataframe = loadJSONs(foldersplit)
     
-        pickle.dump(jsondataframe, open("jsondict.pickle", "wb"))
-        if option is "json":
-            return jsondataframe
+        if foldersplit == False:
+            pickle.dump(jsondataframe, open("jsondict.pickle", "wb"))
+            if option is "json":
+                return jsondataframe
 
     return csvdataframe, jsondataframe
 
