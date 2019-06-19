@@ -69,10 +69,10 @@ def loadCSVs(foldersplit=False):
         name = os.path.basename(subdir)
         print("Parsing", name, "CSVs")
         datatypes[name] = []
-        dirdf = pd.DataFrame()        
+        dirdf = pd.DataFrame()
         for file in files:
             for user in users:
-                if fnmatch.fnmatch(file, "*"+user+"*"+"csv") and "calendar" not in subdir and "dinning" not in subdir and "EMA" not in subdir and "audio" not in subdir:
+                if fnmatch.fnmatch(file, "*"+user+"*"+"csv") and "dinning" not in subdir and "EMA" not in subdir and "audio" not in subdir:
                     # print(file)
                     datatypes[name].append(user)
 
@@ -80,13 +80,18 @@ def loadCSVs(foldersplit=False):
                     userdf['userid'] = user
                     dirdf = dirdf.append(userdf)
                     # print(userdf)
-        if foldersplit == True:
+        # if "audio" in subdir:
+        #     filename = "separate_"+name+".pickle"
+        #     pickle.dump(dirdf, open(filename, "wb"))
+        #     print("Saved", filename)
+        if foldersplit == True and dirdf.empty() == False:
             filename = "csv"+name+".pickle"
             pickle.dump(dirdf, open(filename, "wb"))
             print("Saved", filename)
         else:
             dataframes[name] = dirdf
-
+    delete = [key for key in dataframes if dataframes[key].empty]
+    for key in delete: del dataframes[key]
     for df in dataframes:
         if dataframes[df].empty:
             print(df,"is empty")
@@ -123,7 +128,7 @@ def loadJSONs(foldersplit=False):
                         else:
                             print("Empty DF for:", name, user)
         # save dataframe pickle to folder
-        if foldersplit == True:
+        if foldersplit == True and dirdf.empty == False:
             filename = "json"+name+".pickle"
             pickle.dump(dirdf, open(filename, "wb"))
             print("Saved", filename)
@@ -161,5 +166,5 @@ def makeDFs(option="both",foldersplit=False):
     return csvdataframe, jsondataframe
 
 # jsondf = makeDFs(option="json")
-csvdf, jsondf = makeDFs()
+csvdf = makeDFs(option="json")
 # csvdf = makeDFs(option='csv')
