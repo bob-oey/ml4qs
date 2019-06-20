@@ -3,6 +3,7 @@ import json
 import os
 import pickle
 import sys
+import gzip
 
 import numpy as np
 import pandas as pd
